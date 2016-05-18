@@ -18,18 +18,19 @@ class LawyerInfo:
             self.request.add_header('User-Agent', '''Mozilla/5.0 (Windows NT 10.0; WOW64)
                                                     AppleWebKit/537.36 (KHTML, like Gecko)
                                                     Chrome/50.0.2661.102 Safari/537.36''')"""
-            self.response = urllib2.urlopen(self.request)
+            response = urllib2.urlopen(self.request)
         except urllib2.HTTPError as e:
             print "The server couldn't fulfill the request"
             print "Error code: ", e.code
+            self.rescode = e.code
         except urllib2.URLError as e:
             print "Failed to reach the server"
             print "The reason: ", e.reason
         else:
-            self.resUrl = self.response.geturl()
-            self.soup = BeautifulSoup(self.response.read(), 'html.parser')
-        finally:
-            self.response.close()
+            self.rescode = 200
+            self.resUrl = response.geturl()
+            self.soup = BeautifulSoup(response.read(), 'html.parser')
+            response.close()
 
     def display(self):
         self.parse()
@@ -100,7 +101,23 @@ class LawyerInfo:
             awards = LawyerInfo.get_from_template(caption)
         return awards
 
+    def get_payment(self):
+        payment = None
+        caption = self.soup.find(text="Payment")
+        if caption:
+            payment_area = caption.find_parent("div").find_next_sibling(class_="row")
+            payment_titles_html = payment_area.find_all("strong")
+            payment_titles = [title.string for title in payment_titles_html]
+            payment_info_html = payment_area.find_all("small")
+            payment_info = [info.string for info in payment_info_html]
+            payment = dict(zip(payment_titles, payment_info))
+        print payment
+        return payment
+
     def get_spec_info(self):
+        payment = self.get_payment()
+        if payment:
+            self.lawyer['payment'] = payment
         awards = self.get_field("Awards")
         if awards:
             self.lawyer['awards'] = awards
@@ -127,9 +144,8 @@ class LawyerInfo:
         return self.soup.select('span[itemprop="ratingValue"]')[0].string
 
     def get_practice_areas(self):
-        areas = []
-        areas_html = self.soup.find(id="practice_areas").ol.find_all("li")
-        area = areas_html[0].get_text()
+        areas_html = self.soup.find(href='#practice_areas')
+        areas = areas_html.string.split(",")
         return areas
 
     @staticmethod
@@ -168,7 +184,7 @@ class LawyerInfo:
         self.lawyer['is claimed'] = False
         self.lawyer['practice areas'] = self.get_practice_areas()
         self.lawyer["contact"] = self.get_contact_info()
-        'self.get_spec_info()'
+        self.get_spec_info()
         '''awards = self.get_field("Awards")
         if awards:
             self.lawyer['awards'] = awards
