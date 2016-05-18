@@ -6,16 +6,18 @@ import re
 
 
 class LawyerInfo:
-    baseUrl = "https://www.avvo.com/attorneys/"
+    'baseUrl = "https://www.avvo.com/attorneys/"'
 
-    def __init__(self, lawyer_id):
+    def __init__(self, request, lawyer_id):
+        self.lawyer_id = lawyer_id
         self.lawyer = {}
-        self.url = LawyerInfo.baseUrl + str(lawyer_id) + ".html"
+        'self.url = LawyerInfo.baseUrl + str(lawyer_id) + ".html"'
+        self.request = request
         try:
-            self.request = urllib2.Request(self.url)
+            """self.request = urllib2.Request(self.url)
             self.request.add_header('User-Agent', '''Mozilla/5.0 (Windows NT 10.0; WOW64)
                                                     AppleWebKit/537.36 (KHTML, like Gecko)
-                                                    Chrome/50.0.2661.102 Safari/537.36''')
+                                                    Chrome/50.0.2661.102 Safari/537.36''')"""
             self.response = urllib2.urlopen(self.request)
         except urllib2.HTTPError as e:
             print "The server couldn't fulfill the request"
@@ -156,7 +158,6 @@ class LawyerInfo:
         contact['address'] = LawyerInfo.get_address(contact_html)
         contact['phone'] = contact_html.select('span[itemprop="telephone"]')[0].a.get('href').split(":")[-1]
         contact['fax'] = LawyerInfo.get_fax(contact_html)
-        print contact
         return contact
 
     def parse(self):
@@ -190,12 +191,3 @@ class LawyerInfo:
         if speaking_engagements:
             self.lawyer["Speaking engagements"] = speaking_engagements'''
         return self.lawyer
-
-
-def test():
-    lawyer_info = LawyerInfo(688086)
-    'lawyer_info = LawyerInfo(2)'
-    lawyer = lawyer_info.parse()
-    'print lawyer'
-
-test()
