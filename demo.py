@@ -111,7 +111,7 @@ class LawyerInfo:
             payment_info_html = payment_area.find_all("small")
             payment_info = [info.string for info in payment_info_html]
             payment = dict(zip(payment_titles, payment_info))
-        print payment
+        'print payment'
         return payment
 
     def get_spec_info(self):

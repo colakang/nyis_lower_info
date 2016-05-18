@@ -11,6 +11,6 @@ def test(lawyer_id):
         Chrome/50.0.2661.102 Safari/537.36''')
     lawyer = demo.LawyerInfo(request, lawyer_id).parse()
 
-    'print lawyer'
+    print lawyer
 
 test(688086)
