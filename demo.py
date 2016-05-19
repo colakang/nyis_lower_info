@@ -34,7 +34,7 @@ class LawyerInfo:
             self.res_id = re.search(r'(\d+)\.html', self.resUrl).group(1)
             if self.lawyer_id != int(self.res_id):
                 self.rescode = 600
-                print "read a person twice"
+                print "read a person twice, origin: ", self.lawyer_id, " response id: ", self.res_id
 
     def display(self):
         self.parse()
@@ -187,33 +187,35 @@ class LawyerInfo:
             self.lawyer['contact'] = contact
 
     def parse(self):
-        self.lawyer['id'] = self.res_id
-        self.lawyer['name'] = self.get_name()
-        self.lawyer['licences'] = self.get_licences()
-        self.lawyer['avvo score'] = self.get_avvo_score()
-        self.lawyer['is claimed'] = False
-        self.lawyer['practice areas'] = self.get_practice_areas()
-        self.get_contact_info()
-        self.get_spec_info()
-        '''awards = self.get_field("Awards")
-        if awards:
-            self.lawyer['awards'] = awards
-        work_exp = self.get_field("Work experience")
-        if work_exp:
-            self.lawyer['work experience'] = work_exp
-        associations = self.get_field("Associations")
-        if associations:
-            self.lawyer["associations"] = associations
-        legal_cases = self.get_field("Legal cases")
-        if legal_cases:
-            self.lawyer["legal cases"] = legal_cases
-        publications = self.get_field("Publications")
-        if publications:
-            self.lawyer["publications"] = publications
-        education = self.get_field("Education")
-        if education:
-            self.lawyer["education"] = education
-        speaking_engagements = self.get_field("Speaking engagements")
-        if speaking_engagements:
-            self.lawyer["Speaking engagements"] = speaking_engagements'''
-        return self.lawyer
+        if self.rescode == 200:
+            self.lawyer['id'] = self.res_id
+            self.lawyer['name'] = self.get_name()
+            self.lawyer['licences'] = self.get_licences()
+            self.lawyer['avvo score'] = self.get_avvo_score()
+            self.lawyer['is claimed'] = False
+            self.lawyer['practice areas'] = self.get_practice_areas()
+            self.get_contact_info()
+            self.get_spec_info()
+            '''awards = self.get_field("Awards")
+            if awards:
+                self.lawyer['awards'] = awards
+            work_exp = self.get_field("Work experience")
+            if work_exp:
+                self.lawyer['work experience'] = work_exp
+            associations = self.get_field("Associations")
+            if associations:
+                self.lawyer["associations"] = associations
+            legal_cases = self.get_field("Legal cases")
+            if legal_cases:
+                self.lawyer["legal cases"] = legal_cases
+            publications = self.get_field("Publications")
+            if publications:
+                self.lawyer["publications"] = publications
+            education = self.get_field("Education")
+            if education:
+                self.lawyer["education"] = education
+            speaking_engagements = self.get_field("Speaking engagements")
+            if speaking_engagements:
+                self.lawyer["Speaking engagements"] = speaking_engagements'''
+            return self.lawyer
+        return None
