@@ -9,8 +9,11 @@ def test(lawyer_id):
     request.add_header('User-Agent', '''Mozilla/5.0 (Windows NT 10.0; WOW64)
         AppleWebKit/537.36 (KHTML, like Gecko)
         Chrome/50.0.2661.102 Safari/537.36''')
-    lawyer = demo.LawyerInfo(request, lawyer_id).parse()
+    lawyerInfo = demo.LawyerInfo(request, lawyer_id)
+    lawyer = None
+    if lawyerInfo.rescode == 200:
+        lawyer = lawyerInfo.parse()
+        print lawyer['id'], ": ", lawyer
 
-    print lawyer
-
-test(688086)
+for i in range(0, 100):
+    test(i + 1)

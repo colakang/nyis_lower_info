@@ -31,14 +31,15 @@ class LawyerInfo:
             self.resUrl = response.geturl()
             self.soup = BeautifulSoup(response.read(), 'html.parser')
             response.close()
+            self.res_id = re.search(r'(\d+)\.html', self.resUrl).group(1)
+            if self.lawyer_id != int(self.res_id):
+                self.rescode = 600
+                print "read a person twice"
 
     def display(self):
         self.parse()
         print self.resUrl
         print self.lawyer
-
-    def get_id(self):
-        return re.search(r'(\d+)\.html', self.resUrl).group(1)
 
     def get_name(self):
         name = {}
@@ -141,7 +142,10 @@ class LawyerInfo:
             self.lawyer["Speaking engagements"] = speaking_engagements
 
     def get_avvo_score(self):
-        return self.soup.select('span[itemprop="ratingValue"]')[0].string
+        rating_html = self.soup.select('span[itemprop="ratingValue"]')
+        if len(rating_html) != 0:
+            return rating_html[0].string
+        return "N/A"
 
     def get_practice_areas(self):
         areas_html = self.soup.find(href='#practice_areas')
@@ -154,36 +158,42 @@ class LawyerInfo:
         name = temp.find("strong")
         if name:
             address["name"] = name.string
-        address["street address"] = temp.select('span[itemprop="streetAddress"]')[0].get_text()
-        address["city"] = temp.select('span[itemprop="addressLocality"]')[0].get_text()
-        address["state"] = temp.select('span[itemprop="addressRegion"]')[0].get_text()
-        address["zipcode"] = temp.select('span[itemprop="postalCode"]')[0].get_text()
+        street_html = temp.select('span[itemprop="streetAddress"]')
+        if len(street_html) != 0:
+            address["street address"] = street_html[0].get_text()
+        city_html = temp.select('span[itemprop="addressLocality"]')
+        if len(city_html) != 0:
+            address["city"] = city_html[0].get_text()
+        state_html = temp.select('span[itemprop="addressRegion"]')
+        if len(state_html) != 0:
+            address["state"] = state_html[0].get_text()
+        zip_html = temp.select('span[itemprop="postalCode"]')
+        if len(zip_html) != 0:
+            address["zipcode"] = zip_html[0].get_text()
         return address
 
-    @staticmethod
-    def get_fax(temp):
-        fax = ""
-        fax_html = temp.select('span[itemprop="faxNumber"]')
-        if fax_html:
-            fax = fax_html[0].a.get('href').split(":")[-1]
-        return fax
-
     def get_contact_info(self):
-        contact = {}
-        contact_html = self.soup.find(id="contact").find("address")
-        contact['address'] = LawyerInfo.get_address(contact_html)
-        contact['phone'] = contact_html.select('span[itemprop="telephone"]')[0].a.get('href').split(":")[-1]
-        contact['fax'] = LawyerInfo.get_fax(contact_html)
-        return contact
+        '''contact information is also optional'''
+        contact_html = self.soup.find(id="contact")
+        if contact_html:
+            contact = {}
+            contact['address'] = LawyerInfo.get_address(contact_html)
+            phone_html = contact_html.select('span[itemprop="telephone"]')
+            if len(phone_html) != 0:
+                contact['phone'] = phone_html[0].a.get('href').split(":")[-1]
+            fax_html = contact_html.select('span[itemprop="faxNumber"]')
+            if len(fax_html) != 0:
+                contact['fax'] = fax_html[0].a.get('href').split(":")[-1]
+            self.lawyer['contact'] = contact
 
     def parse(self):
-        self.lawyer['id'] = self.get_id()
+        self.lawyer['id'] = self.res_id
         self.lawyer['name'] = self.get_name()
         self.lawyer['licences'] = self.get_licences()
         self.lawyer['avvo score'] = self.get_avvo_score()
         self.lawyer['is claimed'] = False
         self.lawyer['practice areas'] = self.get_practice_areas()
-        self.lawyer["contact"] = self.get_contact_info()
+        self.get_contact_info()
         self.get_spec_info()
         '''awards = self.get_field("Awards")
         if awards:
