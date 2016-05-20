@@ -29,7 +29,7 @@ class LawyerInfo:
         else:
             self.rescode = 200
             self.resUrl = response.geturl()
-            self.soup = BeautifulSoup(response.read(), 'html.parser')
+            self.soup = BeautifulSoup(response.read(), 'lxml')
             response.close()
             self.res_id = re.search(r'(\d+)\.html', self.resUrl).group(1)
             if self.lawyer_id != int(self.res_id):

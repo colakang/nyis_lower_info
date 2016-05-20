@@ -1,8 +1,12 @@
 from scheduler import Scheduler
+import time
 
 
 def test():
-    sd = Scheduler(1, 30)
+    start = time.time()
+    sd = Scheduler(1, 60)
     sd.run()
+    end = time.time()
+    print "total: ", end - start
 
 test()
