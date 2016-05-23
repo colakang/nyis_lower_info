@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from datetime import datetime
 import urllib2
 import re
 
@@ -8,8 +9,8 @@ import re
 class LawyerInfo:
     'baseUrl = "https://www.avvo.com/attorneys/"'
 
-    def __init__(self, request, lawyer_id):
-        self.lawyer_id = lawyer_id
+    def __init__(self, request, avvo_id):
+        self.avvo_id = avvo_id
         self.lawyer = {}
         'self.url = LawyerInfo.baseUrl + str(lawyer_id) + ".html"'
         self.request = request
@@ -31,8 +32,8 @@ class LawyerInfo:
             self.resUrl = response.geturl()
             self.soup = BeautifulSoup(response.read(), 'html.parser')
             response.close()
-            self.res_id = re.search(r'(\d+)\.html', self.resUrl).group(1)
-            if self.lawyer_id != int(self.res_id):
+            self.res_id = int(re.search(r'(\d+)\.html', self.resUrl).group(1))
+            if self.avvo_id != self.res_id:
                 self.rescode = 600
                 print "read a person twice"
 
@@ -42,21 +43,18 @@ class LawyerInfo:
         print self.lawyer
 
     def get_name(self):
-        name = {}
-        fullname = self.soup.select('h1 span[itemprop="name"]')[0].string.split(" ")
-        name['lastName'] = fullname.pop()
-        name['firstName'] = " ".join(fullname)
-        return name
+        return self.soup.select('h1 span[itemprop="name"]')[0].string
 
-    def get_licences(self):
+    def get_licenses(self):
         licences_html = self.soup.find("caption", text="License").find_next_sibling("tbody").find_all("tr")
         licences = []
         for lh in licences_html:
-            licence = {"id": None}
+            licence = dict()
+            licence['id'] = None
             licence["state"] = lh.find(attrs={"data-title": "State"}).get_text()
             licence["status"] = lh.find(attrs={"data-title": "Status"}).get_text()
-            licence["origin"] = lh.find(attrs={"data-title": "Origin"}).get_text()
-            licence["updated"] = lh.find(attrs={"data-title": "Updated"}).get_text()
+            licence["origin"] = int(lh.find(attrs={"data-title": "Origin"}).get_text())
+            licence["updated"] = datetime.strptime(lh.find(attrs={"data-title": "Updated"}).get_text(), '%m/%d/%Y')
             licences.append(licence)
         return licences
 
@@ -72,11 +70,11 @@ class LawyerInfo:
         prop = temp.find_next_sibling("thead").tr.th.string
         entries_html = temp.find_next_sibling("tbody").find_all("tr")
         for eh in entries_html:
-            entry = {}
-            entry[prop] = eh.th.string
+            entry = dict()
+            entry[prop.lower().replace(' ', '_')] = eh.th.string
             props = eh.find_all("td")
             for p in props:
-                entry[p["data-title"]] = p.string
+                entry[p["data-title"].lower().replace(' ', '_')] = p.string
             entries.append(entry)
         return entries
 
@@ -108,7 +106,7 @@ class LawyerInfo:
         if caption:
             payment_area = caption.find_parent("div").find_next_sibling(class_="row")
             payment_titles_html = payment_area.find_all("strong")
-            payment_titles = [title.string for title in payment_titles_html]
+            payment_titles = [title.string.split(":")[0].lower().replace(" ", "_") for title in payment_titles_html]
             payment_info_html = payment_area.find_all("small")
             payment_info = [info.string for info in payment_info_html]
             payment = dict(zip(payment_titles, payment_info))
@@ -124,13 +122,13 @@ class LawyerInfo:
             self.lawyer['awards'] = awards
         work_exp = self.get_field("Work experience")
         if work_exp:
-            self.lawyer['work experience'] = work_exp
+            self.lawyer['work_experience'] = work_exp
         associations = self.get_field("Associations")
         if associations:
             self.lawyer["associations"] = associations
         legal_cases = self.get_field("Legal cases")
         if legal_cases:
-            self.lawyer["legal cases"] = legal_cases
+            self.lawyer["legal_cases"] = legal_cases
         publications = self.get_field("Publications")
         if publications:
             self.lawyer["publications"] = publications
@@ -139,7 +137,7 @@ class LawyerInfo:
             self.lawyer["education"] = education
         speaking_engagements = self.get_field("Speaking engagements")
         if speaking_engagements:
-            self.lawyer["Speaking engagements"] = speaking_engagements
+            self.lawyer["speaking_engagements"] = speaking_engagements
 
     def get_avvo_score(self):
         rating_html = self.soup.select('span[itemprop="ratingValue"]')
@@ -160,7 +158,7 @@ class LawyerInfo:
             address["name"] = name.string
         street_html = temp.select('span[itemprop="streetAddress"]')
         if len(street_html) != 0:
-            address["street address"] = street_html[0].get_text()
+            address["street_address"] = street_html[0].get_text()
         city_html = temp.select('span[itemprop="addressLocality"]')
         if len(city_html) != 0:
             address["city"] = city_html[0].get_text()
@@ -176,7 +174,7 @@ class LawyerInfo:
         '''contact information is also optional'''
         contact_html = self.soup.find(id="contact")
         if contact_html:
-            contact = {}
+            contact = dict()
             contact['address'] = LawyerInfo.get_address(contact_html)
             phone_html = contact_html.select('span[itemprop="telephone"]')
             if len(phone_html) != 0:
@@ -187,12 +185,12 @@ class LawyerInfo:
             self.lawyer['contact'] = contact
 
     def parse(self):
-        self.lawyer['id'] = self.res_id
+        self.lawyer['avvo_id'] = self.res_id
         self.lawyer['name'] = self.get_name()
-        self.lawyer['licences'] = self.get_licences()
-        self.lawyer['avvo score'] = self.get_avvo_score()
-        self.lawyer['is claimed'] = False
-        self.lawyer['practice areas'] = self.get_practice_areas()
+        self.lawyer['licenses'] = self.get_licenses()
+        self.lawyer['avvo_score'] = self.get_avvo_score()
+        self.lawyer['is_claimed'] = False
+        self.lawyer['practice_areas'] = self.get_practice_areas()
         self.get_contact_info()
         self.get_spec_info()
         '''awards = self.get_field("Awards")
