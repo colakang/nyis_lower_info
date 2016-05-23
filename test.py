@@ -1,6 +1,7 @@
 import urllib2
 import demo
 import models
+import time
 
 
 def test(avvo_id):
@@ -13,15 +14,17 @@ def test(avvo_id):
     lawyer_info = demo.LawyerInfo(request, avvo_id)
     if lawyer_info.rescode == 200:
         lawyer = lawyer_info.parse()
-        for prop in lawyer:
-            print prop
         lawyer_db = models.conn.Lawyer(lawyer)
         lawyer_db.save()
+        print lawyer['avvo_id'], " is saved"
 
-test(2)
+'test(2)'
 'test(688086)'
-'''for i in range(0, 100):
-    test(i + 1)'''
+start = time.time()
+for i in range(0, 100):
+    test(i + 1)
+end = time.time()
+print end - start
 
 '''lawyer = models.conn.Lawyer.one({'avvo_id': 2})
 print lawyer'''
