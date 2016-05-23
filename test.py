@@ -1,12 +1,12 @@
 from scheduler import Scheduler
-import time
 
 
 def test():
-    start = time.time()
-    sd = Scheduler(1, 60)
+    schedule_config = {
+        'thread_num': 3,
+        'end': 100
+    }
+    sd = Scheduler(**schedule_config)
     sd.run()
-    end = time.time()
-    print "total: ", end - start
 
 test()

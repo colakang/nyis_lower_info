@@ -1,22 +1,47 @@
 from demo import LawyerInfo
 import time
 import urllib2
+import threading
+
+USER_AGENT = '''Mozilla/5.0 (Windows NT 10.0; WOW64)
+    AppleWebKit/537.36 (KHTML, like Gecko)
+    Chrome/50.0.2661.102 Safari/537.36'''
+BASE_URL = "https://www.avvo.com/attorneys/"
+
+
+class SpiderThread(threading.Thread):
+    def __init__(self, begin, thread_num, end):
+        threading.Thread.__init__(self)
+        self.begin = begin
+        self.thread_num = thread_num
+        self.end = end
+
+    def run(self):
+        for i in range(self.begin, self.end + 1, self.thread_num):
+            url = BASE_URL + str(i) + ".html"
+            request = urllib2.Request(url)
+            request.add_header('User-Agent', USER_AGENT)
+            lawyer_info = LawyerInfo(request, i)
+            if lawyer_info.rescode == 200:
+                lawyer = lawyer_info.parse()
+                print lawyer
 
 
 class Scheduler:
-    def __init__(self, begin, end):
-        self.begin = begin
+    def __init__(self, thread_num=2, end=100, *arguments, **keywords):
+        self.thread_num = thread_num
         self.end = end
-        self.base_url = "https://www.avvo.com/attorneys/"
 
     def run(self):
-        for i in range(self.begin, self.end + 1):
-            url = self.base_url + str(i) + ".html"
-            request = urllib2.Request(url)
-            request.add_header('User-Agent', '''Mozilla/5.0 (Windows NT 10.0; WOW64)
-                    AppleWebKit/537.36 (KHTML, like Gecko)
-                    Chrome/50.0.2661.102 Safari/537.36''')
-            start = time.time()
-            LawyerInfo(request, i).parse()
-            end = time.time()
-            print end - start
+        threads = []
+        for i in range(0, self.thread_num):
+            threads.append(SpiderThread(i + 1, self.thread_num, self.end))
+
+        start = time.time()
+        for ts in threads:
+            ts.start()
+
+        for ts in threads:
+            ts.join()
+        end = time.time()
+        print end - start
