@@ -153,7 +153,7 @@ class Lawyer(Document):
             'date': basestring
         }]
     }
-    required_fields = ['avvo_id', 'name', 'licenses', 'practice_areas']
+    required_fields = ['avvo_id', 'name', 'licenses']
     # use avvo_id as index to optimize query
     indexes = [{
         'fields': ['avvo_id'],
