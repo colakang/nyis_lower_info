@@ -3,6 +3,7 @@ import time
 import urllib2
 import threading
 import logging
+import models
 
 USER_AGENT = '''Mozilla/5.0 (Windows NT 10.0; WOW64)
     AppleWebKit/537.36 (KHTML, like Gecko)
@@ -29,6 +30,8 @@ class SpiderThread(threading.Thread):
                 if lawyer_info.rescode == 200:
                     lawyer = lawyer_info.parse()
                     '''print lawyer['id'], " is parsed"'''
+                    lawyer_db = models.conn.Lawyer(lawyer)
+                    lawyer_db.save()
                     logging.debug("%d is parsed" % lawyer['id'])
         except Exception as e:
             '''print "Thread ", self.getName(), " is terminated due to ", e.message'''
