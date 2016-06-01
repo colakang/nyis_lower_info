@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import urllib2
 import re
+import logging
 
 '''parse a single lawyer information'''
 
@@ -20,21 +21,26 @@ class LawyerInfo:
                                                     Chrome/50.0.2661.102 Safari/537.36''')"""
             response = urllib2.urlopen(self.request)
         except urllib2.HTTPError as e:
-            print "The server couldn't fulfill the request"
-            print "Error code: ", e.code
+            '''print "The server couldn't fulfill the request"
+            print "Error code: ", e.code'''
+            logging.debug("The server couldn't fulfill the request, error code: %s, lawyer id: %d"
+                          % (e.code, self.lawyer_id))
             self.rescode = e.code
         except urllib2.URLError as e:
-            print "Failed to reach the server"
-            print "The reason: ", e.reason
+            '''print "Failed to reach the server"
+            print "The reason: ", e.reason'''
+            logging.debug("Failed to reach the server. The reason: %s, lawyer id: %d" % (e.reason, self.lawyer_id))
+            self.rescode = 500
         else:
             self.rescode = 200
             self.resUrl = response.geturl()
             self.soup = BeautifulSoup(response.read(), 'lxml')
             response.close()
-            self.res_id = re.search(r'(\d+)\.html', self.resUrl).group(1)
-            if self.lawyer_id != int(self.res_id):
+            self.res_id = int(re.search(r'(\d+)\.html', self.resUrl).group(1))
+            if self.lawyer_id != self.res_id:
                 self.rescode = 600
-                print "read a person twice, origin: ", self.lawyer_id, " response id: ", self.res_id
+                logging.debug("read a person twice, origin: %d, response id: %d" % (self.lawyer, self.res_id))
+                '''print "read a person twice, origin: ", self.lawyer_id, " response id: ", self.res_id'''
 
     def display(self):
         self.parse()
@@ -149,8 +155,10 @@ class LawyerInfo:
 
     def get_practice_areas(self):
         areas_html = self.soup.find(href='#practice_areas')
-        areas = areas_html.string.split(",")
-        return areas
+        if areas_html:
+            areas = areas_html.string.split(",")
+            return areas
+        return None
 
     @staticmethod
     def get_address(temp):
@@ -188,12 +196,16 @@ class LawyerInfo:
 
     def parse(self):
         if self.rescode == 200:
+            '''print self.res_id, "begin parsing"'''
             self.lawyer['id'] = self.res_id
             self.lawyer['name'] = self.get_name()
             self.lawyer['licences'] = self.get_licences()
             self.lawyer['avvo score'] = self.get_avvo_score()
             self.lawyer['is claimed'] = False
-            self.lawyer['practice areas'] = self.get_practice_areas()
+            practice_areas = self.get_practice_areas()
+            # practice area is also optional
+            if practice_areas:
+                self.lawyer['practice areas'] = practice_areas
             self.get_contact_info()
             self.get_spec_info()
             '''awards = self.get_field("Awards")
