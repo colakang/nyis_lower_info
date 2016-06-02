@@ -25,12 +25,12 @@ class LawyerInfo:
             '''print "The server couldn't fulfill the request"
             print "Error code: ", e.code'''
             logging.debug("The server couldn't fulfill the request, error code: %s, lawyer id: %d"
-                          % (e.code, self.lawyer_id))
+                          % (e.code, self.avvo_id))
             self.rescode = e.code
         except urllib2.URLError as e:
             '''print "Failed to reach the server"
             print "The reason: ", e.reason'''
-            logging.debug("Failed to reach the server. The reason: %s, lawyer id: %d" % (e.reason, self.lawyer_id))
+            logging.debug("Failed to reach the server. The reason: %s, lawyer id: %d" % (e.reason, self.avvo_id))
             self.rescode = 500
         else:
             self.rescode = 200
@@ -38,13 +38,9 @@ class LawyerInfo:
             self.soup = BeautifulSoup(response.read(), 'lxml')
             response.close()
             self.res_id = int(re.search(r'(\d+)\.html', self.resUrl).group(1))
-<<<<<<< HEAD
-            if self.lawyer_id != self.res_id:
-=======
             if self.avvo_id != self.res_id:
->>>>>>> database_dev
                 self.rescode = 600
-                logging.debug("read a person twice, origin: %d, response id: %d" % (self.lawyer, self.res_id))
+                logging.debug("read a person twice, origin: %d, response id: %d" % (self.avvo_id, self.res_id))
                 '''print "read a person twice, origin: ", self.lawyer_id, " response id: ", self.res_id'''
 
     def display(self):
@@ -197,14 +193,13 @@ class LawyerInfo:
             self.lawyer['contact'] = contact
 
     def parse(self):
-<<<<<<< HEAD
         if self.rescode == 200:
             '''print self.res_id, "begin parsing"'''
-            self.lawyer['id'] = self.res_id
+            self.lawyer['avvo_id'] = self.res_id
             self.lawyer['name'] = self.get_name()
-            self.lawyer['licences'] = self.get_licences()
-            self.lawyer['avvo score'] = self.get_avvo_score()
-            self.lawyer['is claimed'] = False
+            self.lawyer['licenses'] = self.get_licenses()
+            self.lawyer['avvo_score'] = self.get_avvo_score()
+            self.lawyer['is_claimed'] = False
             practice_areas = self.get_practice_areas()
             # practice area is also optional
             if practice_areas:
@@ -234,7 +229,7 @@ class LawyerInfo:
                 self.lawyer["Speaking engagements"] = speaking_engagements'''
             return self.lawyer
         return None
-=======
+"""
         self.lawyer['avvo_id'] = self.res_id
         self.lawyer['name'] = self.get_name()
         self.lawyer['licenses'] = self.get_licenses()
@@ -265,4 +260,4 @@ class LawyerInfo:
         if speaking_engagements:
             self.lawyer["Speaking engagements"] = speaking_engagements'''
         return self.lawyer
->>>>>>> database_dev
+>>>>>>> database_dev"""

@@ -29,10 +29,11 @@ class SpiderThread(threading.Thread):
                 lawyer_info = LawyerInfo(request, i)
                 if lawyer_info.rescode == 200:
                     lawyer = lawyer_info.parse()
+                    logging.debug("%d is parsed" % lawyer['avvo_id'])
                     '''print lawyer['id'], " is parsed"'''
-                    lawyer_db = models.conn.Lawyer(lawyer)
-                    lawyer_db.save()
-                    logging.debug("%d is parsed" % lawyer['id'])
+                    #lawyer_db = models.conn.Lawyer(lawyer)
+                    #lawyer_db.save()
+                    models.save(lawyer)
         except Exception as e:
             '''print "Thread ", self.getName(), " is terminated due to ", e.message'''
             logging.error("Thread %s is terminated due to %s" % (self.getName(), e.message))

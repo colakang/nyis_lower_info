@@ -80,6 +80,7 @@ class Lawyer(Document):
 
 from mongokit import *
 import datetime
+import logging
 
 conn = Connection()
 
@@ -162,4 +163,23 @@ class Lawyer(Document):
 
 
 def save(lawyer):
-    pass
+    result = conn.Lawyer.one({'avvo_id': lawyer['avvo_id']})
+    if not result:
+        lawyer_db = conn.Lawyer(lawyer)
+        lawyer_db.save()
+        logging.debug("Lawyer id: %d is created" % lawyer['avvo_id'])
+        return
+    is_dif = False
+    for prop in lawyer:
+        if prop not in result:
+            result[prop] = lawyer[prop]
+            is_dif = True
+        elif result[prop] != lawyer[prop]:
+            result[prop] = lawyer[prop]
+            is_dif = True
+    if is_dif:
+        logging.debug("Lawyer id: %d is updated" % lawyer['avvo_id'])
+        result.save()
+    else:
+        logging.debug("Lawyer id: %d is kept" % lawyer['avvo_id'])
+    print result
