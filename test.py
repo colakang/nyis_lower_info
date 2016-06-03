@@ -6,7 +6,7 @@ import urllib2
 def test():
     schedule_config = {
         'thread_num': 5,
-        'end': 100
+        'end': 50000
     }
     logging.basicConfig(filename='spider_info.log', level=logging.DEBUG)
     sd = Scheduler(**schedule_config)

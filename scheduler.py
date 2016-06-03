@@ -36,7 +36,7 @@ class SpiderThread(threading.Thread):
                     models.save(lawyer)
         except Exception as e:
             '''print "Thread ", self.getName(), " is terminated due to ", e.message'''
-            logging.error("Thread %s is terminated due to %s" % (self.getName(), e.message))
+            logging.error("Thread %s is terminated due to %s, url: %s" % (self.getName(), e.message, url))
         else:
             logging.debug("Thread %s ends" % self.getName())
             '''print "Thread ", self.getName(), " ends"'''
