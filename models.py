@@ -87,7 +87,7 @@ conn = Connection()
 
 @conn.register
 class Lawyer(Document):
-    __database__ = 'nyis'
+    __database__ = 'avvo_lawyer_info'
     __collection__ = 'lawyers'
     use_schemaless = True
     structure = {
@@ -164,22 +164,19 @@ class Lawyer(Document):
 
 def save(lawyer):
     result = conn.Lawyer.one({'avvo_id': lawyer['avvo_id']})
-    if not result:
+    if result:
+        is_diff = False
+        for prop in lawyer:
+            if prop not in result or result[prop] != lawyer[prop]:
+                result[prop] = lawyer[prop]
+                is_diff = True
+        if is_diff:
+            logging.debug('Lawyer id: %d is updated' % lawyer['avvo_id'])
+            result.save()
+        else:
+            logging.debug('Lawyer id: %d is kept' % lawyer['avvo_id'])
+    else:
         lawyer_db = conn.Lawyer(lawyer)
         lawyer_db.save()
         logging.debug("Lawyer id: %d is created" % lawyer['avvo_id'])
-        return
-    is_dif = False
-    for prop in lawyer:
-        if prop not in result:
-            result[prop] = lawyer[prop]
-            is_dif = True
-        elif result[prop] != lawyer[prop]:
-            result[prop] = lawyer[prop]
-            is_dif = True
-    if is_dif:
-        logging.debug("Lawyer id: %d is updated" % lawyer['avvo_id'])
-        result.save()
-    else:
-        logging.debug("Lawyer id: %d is kept" % lawyer['avvo_id'])
-    print result
+
