@@ -43,14 +43,15 @@ class SpiderThread(threading.Thread):
 
 
 class Scheduler:
-    def __init__(self, thread_num=2, end=100, *arguments, **keywords):
+    def __init__(self, thread_num=2, end=100, begin=0, *arguments, **keywords):
+        self.begin = begin
         self.thread_num = thread_num
         self.end = end
 
     def run(self):
         threads = []
         for i in range(0, self.thread_num):
-            threads.append(SpiderThread(i + 1, self.thread_num, self.end))
+            threads.append(SpiderThread(self.begin + i + 1, self.thread_num, self.end))
 
         start = time.time()
         for ts in threads:
