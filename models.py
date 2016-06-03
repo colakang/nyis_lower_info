@@ -97,7 +97,7 @@ class Lawyer(Document):
             'id': int,
             'state': basestring,
             'status': basestring,
-            'origin': int,
+            'origin': basestring,
             'updated': datetime.datetime
         }],
         'contact': {

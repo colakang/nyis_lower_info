@@ -59,7 +59,9 @@ class LawyerInfo:
             licence['id'] = None
             licence["state"] = lh.find(attrs={"data-title": "State"}).get_text()
             licence["status"] = lh.find(attrs={"data-title": "Status"}).get_text()
-            licence["origin"] = int(lh.find(attrs={"data-title": "Origin"}).get_text())
+            # licence["origin"] = int(lh.find(attrs={"data-title": "Origin"}).get_text())
+            # it may unknown
+            licence["origin"] = lh.find(attrs={"data-title": "Origin"}).get_text()
             licence["updated"] = datetime.strptime(lh.find(attrs={"data-title": "Updated"}).get_text(), '%m/%d/%Y')
             licences.append(licence)
         return licences
