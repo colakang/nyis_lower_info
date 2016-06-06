@@ -1,7 +1,7 @@
 from demo import LawyerInfo
 import time
 import urllib2
-from multiprocessing.dummy import Pool as ThreadPool
+import threading
 import logging
 import models
 
@@ -11,7 +11,7 @@ USER_AGENT = '''Mozilla/5.0 (Windows NT 10.0; WOW64)
 BASE_URL = 'https://www.avvo.com/attorneys/'
 
 
-def crawl(avvo_id):
+'''def crawl(avvo_id):
     url = BASE_URL + str(avvo_id) + ".html"
     request = urllib2.Request(url)
     request.add_header('User_Agent', USER_AGENT)
@@ -43,9 +43,10 @@ class Scheduler:
             logging.info("End at " + time.strftime("%Y-%m-%d %A %X %Z", time.localtime()))
             end = time.time()
             logging.info("total time: %d" % (end - start))
+'''
 
 
-"""class SpiderThread(threading.Thread):
+class SpiderThread(threading.Thread):
     def __init__(self, begin, thread_num, end):
         threading.Thread.__init__(self)
         self.begin = begin
@@ -70,7 +71,7 @@ class Scheduler:
                     models.save(lawyer)
         except Exception as e:
             '''print "Thread ", self.getName(), " is terminated due to ", e.message'''
-            logging.error("Thread %s is terminated due to %s, url: %s" % (self.getName(), e.message, url))
+            logging.error("Thread %s is terminated due to %s, url: %s" % (self.getName(), str(e), url))
         else:
             logging.debug("Thread %s ends" % self.getName())
             '''print "Thread ", self.getName(), " ends"'''
@@ -95,4 +96,4 @@ class Scheduler:
             ts.join()
         end = time.time()
         print "total time: ", end - start
-        logging.info("total time: %d" % (end - start))"""
+        logging.info("total time: %d" % (end - start))

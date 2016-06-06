@@ -31,7 +31,7 @@ class LawyerInfo:
             '''print "Failed to reach the server"
             print "The reason: ", e.reason'''
             logging.debug("Failed to reach the server. The reason: %s, lawyer id: %d" % (e.reason, self.avvo_id))
-            self.rescode = 500
+            self.rescode = 700
         else:
             self.rescode = 200
             self.resUrl = response.geturl()
