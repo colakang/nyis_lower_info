@@ -1,17 +1,33 @@
 from scheduler import Scheduler
 import logging
 import urllib2
+import time
 
 
 def test():
-    schedule_config = {
+    '''schedule_config = {
         'begin': 1,
         'thread_num': 5,
         'end': 20
     }
     logging.basicConfig(filename='spider_info.log', level=logging.DEBUG)
     sd = Scheduler(**schedule_config)
-    sd.run()
+    sd.run()'''
+    logging.basicConfig(filename='debug.log', filemode='w', level=logging.DEBUG)
+    step = 100
+    begin = 1
+    while begin <= 1955416:
+        schedule_config = {
+            'begin': begin,
+            'thread_num': 8,
+            'end': begin + step
+        }
+        begin += step
+        sd = Scheduler(**schedule_config)
+        print "one step begins"
+        sd.run()
+        print "one step ends"
+        time.sleep(10)
 
 
 def single_test(avvo_id):
