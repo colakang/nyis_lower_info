@@ -5,7 +5,7 @@ import urllib2
 
 def test():
     schedule_config = {
-        'begin': 10,
+        'begin': 1,
         'thread_num': 5,
         'end': 20
     }
